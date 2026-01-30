@@ -1,0 +1,8 @@
+# Large data files (download from https://stvno.github.io/page/cliwoc/)
+CLIWOC21.tsv
+CLIWOC21.ods
+CLIWOC21.gpkg
+
+# Intermediate files
+ports_anchored.csv
+all_ports_summary.csv
