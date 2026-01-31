@@ -21,8 +21,12 @@
             max-width: 350px;
             max-height: 90vh;
             overflow-y: auto;
+            transition: transform 0.3s ease;
         }
-        .info-panel h3 { margin-top: 0; }
+        .info-panel h3 { margin-top: 0; cursor: pointer; }
+        .info-panel h3::after { content: ' ▼'; font-size: 10px; }
+        .info-panel.collapsed h3::after { content: ' ▶'; }
+        .info-panel.collapsed .panel-content { display: none; }
         .controls {
             position: absolute;
             top: 10px;
@@ -33,6 +37,10 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             z-index: 1000;
         }
+        .controls-title { cursor: pointer; margin-bottom: 8px; }
+        .controls-title::after { content: ' ▼'; font-size: 10px; }
+        .controls.collapsed .controls-title::after { content: ' ▶'; }
+        .controls.collapsed .controls-content { display: none; }
         .legend {
             position: absolute;
             bottom: 30px;
@@ -43,64 +51,134 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             z-index: 1000;
         }
+        .legend-title { cursor: pointer; }
+        .legend-title::after { content: ' ▼'; font-size: 10px; }
+        .legend.collapsed .legend-title::after { content: ' ▶'; }
+        .legend.collapsed .legend-content { display: none; }
         input[type="range"] { width: 150px; }
+        input[type="checkbox"] { 
+            width: 18px; 
+            height: 18px; 
+            margin-right: 5px;
+            vertical-align: middle;
+        }
         .slave-trade { color: #cc0000; font-weight: bold; }
         .stat-box { background: #f5f5f5; padding: 8px; border-radius: 4px; margin: 5px 0; }
+
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            .info-panel {
+                top: auto;
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                max-height: 35vh;
+                font-size: 13px;
+                padding: 12px;
+            }
+            .info-panel h3 { font-size: 15px; }
+            .info-panel h4 { font-size: 13px; margin: 8px 0 4px; }
+            .info-panel ul { margin: 5px 0; }
+            .controls {
+                top: 10px;
+                left: 10px;
+                right: auto;
+                font-size: 13px;
+                padding: 8px;
+            }
+            input[type="range"] { 
+                width: 100px; 
+                height: 24px;
+            }
+            .legend {
+                bottom: auto;
+                top: 60px;
+                left: 10px;
+                font-size: 12px;
+                padding: 8px;
+            }
+            .stat-box { padding: 6px; font-size: 12px; }
+        }
+
+        @media (max-width: 480px) {
+            .info-panel {
+                max-height: 30vh;
+                padding: 10px;
+            }
+            .controls {
+                max-width: 160px;
+            }
+            input[type="range"] { 
+                width: 80px; 
+            }
+            .legend {
+                top: auto;
+                bottom: 10px;
+                left: auto;
+                right: 10px;
+                max-width: 110px;
+            }
+        }
     </style>
 </head>
 <body>
     <div id="map"></div>
     
-    <div class="controls">
-        <strong>Route Filter</strong><br>
-        <label>Min voyages: <span id="minLabel">50</span></label><br>
-        <input type="range" id="minVoyages" min="10" max="5000" value="50" step="10">
-        <br><br>
-        <label><input type="checkbox" id="showPorts" checked> Show ports</label><br>
-        <label><input type="checkbox" id="showRoutes" checked> Show all routes</label><br>
-        <label><input type="checkbox" id="highlightSlave" checked> <span class="slave-trade">Highlight slave trade</span></label>
+    <div class="controls" id="controls">
+        <strong class="controls-title" onclick="togglePanel('controls')">Route Filter</strong>
+        <div class="controls-content">
+            <label>Min voyages: <span id="minLabel">50</span></label><br>
+            <input type="range" id="minVoyages" min="10" max="5000" value="50" step="10">
+            <br><br>
+            <label><input type="checkbox" id="showPorts" checked> Show ports</label><br>
+            <label><input type="checkbox" id="showRoutes" checked> Show routes</label><br>
+            <label><input type="checkbox" id="highlightSlave" checked> <span class="slave-trade">Slave trade</span></label>
+        </div>
     </div>
     
-    <div class="info-panel">
-        <h3>CLIWOC Trade Network</h3>
-        <div class="stat-box">
-            <strong>1,013</strong> trade routes<br>
-            <strong>192,847</strong> voyages mapped<br>
-            <strong>1750-1850</strong>
+    <div class="info-panel" id="infoPanel">
+        <h3 onclick="togglePanel('infoPanel')">CLIWOC Trade Network</h3>
+        <div class="panel-content">
+            <div class="stat-box">
+                <strong>1,013</strong> trade routes<br>
+                <strong>192,847</strong> voyages mapped<br>
+                <strong>1750-1850</strong>
+            </div>
+            
+            <h4 class="slave-trade">Transatlantic Slave Trade</h4>
+            <div class="stat-box">
+                <strong style="color:#cc0000;">60</strong> routes involving African ports<br>
+                <strong style="color:#cc0000;">5,309</strong> documented voyages<br>
+                Routes shown in <span style="color:#cc0000;">red</span>
+            </div>
+            
+            <p><strong>Key slave trade routes:</strong></p>
+            <ul style="font-size:12px; padding-left:20px;">
+                <li>Elmina → Suriname</li>
+                <li>Gulf of Guinea → Suriname</li>
+                <li>Guinea → Suriname</li>
+                <li>Cape Coast → Barbados</li>
+                <li>St George d'Elmina → Batavia</li>
+            </ul>
+            
+            <p style="font-size:11px; color:#666;">
+                Note: CLIWOC data underrepresents slave voyages. See the 
+                <a href="https://slavevoyages.org" target="_blank">Trans-Atlantic Slave Trade Database</a> for comprehensive data.
+            </p>
+            <div id="route-info"></div>
         </div>
-        
-        <h4 class="slave-trade">Transatlantic Slave Trade</h4>
-        <div class="stat-box">
-            <strong style="color:#cc0000;">60</strong> routes involving African ports<br>
-            <strong style="color:#cc0000;">5,309</strong> documented voyages<br>
-            Routes shown in <span style="color:#cc0000;">red</span>
-        </div>
-        
-        <p><strong>Key slave trade routes:</strong></p>
-        <ul style="font-size:12px; padding-left:20px;">
-            <li>Elmina → Suriname</li>
-            <li>Gulf of Guinea → Suriname</li>
-            <li>Guinea → Suriname</li>
-            <li>Cape Coast → Barbados</li>
-            <li>St George d'Elmina → Batavia</li>
-        </ul>
-        
-        <p style="font-size:11px; color:#666;">
-            Note: CLIWOC data underrepresents slave voyages as it's primarily from 
-            naval/merchant logbooks. For comprehensive slave trade data, see the 
-            <a href="https://slavevoyages.org" target="_blank">Trans-Atlantic Slave Trade Database</a>.
-        </p>
-        <div id="route-info"></div>
     </div>
     
-    <div class="legend">
-        <strong>Route Types:</strong>
-        <div style="display:flex;align-items:center;margin:5px 0;">
-            <div style="width:40px;height:4px;background:#ffaa00;margin-right:8px;"></div> Commercial
-        </div>
-        <div style="display:flex;align-items:center;margin:5px 0;">
-            <div style="width:40px;height:4px;background:#cc0000;margin-right:8px;"></div> Slave trade (Africa)
-        </div>
+    <div class="legend" id="legend">
+        <strong class="legend-title" onclick="togglePanel('legend')">Route Types:</strong>
+        <div class="legend-content">
+            <div style="display:flex;align-items:center;margin:5px 0;">
+                <div style="width:40px;height:4px;background:#ffaa00;margin-right:8px;"></div> Commercial
+            </div>
+            <div style="display:flex;align-items:center;margin:5px 0;">
+                <div style="width:40px;height:4px;background:#cc0000;margin-right:8px;"></div> Slave trade
+            </div>
         <br>
         <strong>Volume:</strong>
         <div style="display:flex;align-items:center;margin:5px 0;">
@@ -174,15 +252,29 @@
                     <strong>${route.count.toLocaleString()}</strong> voyages
                 `);
                 
-                line.on('mouseover', function() {
+                // Highlight on hover (desktop) and touch (mobile)
+                var highlightRoute = function() {
                     this.setStyle({ weight: getRouteWeight(route.count) + 3, opacity: 1 });
-                });
-                line.on('mouseout', function() {
+                    this.bringToFront();
+                };
+                var unhighlightRoute = function() {
                     this.setStyle({ 
-                        weight: getRouteWeight(route.count), 
-                        opacity: getRouteOpacity(route, highlightSlave) 
+                        weight: getRouteWeight(route.count),
+                        opacity: isSlaveRoute ? 0.8 : 0.6
                     });
+                };
+                
+                line.on('mouseover', highlightRoute);
+                line.on('mouseout', unhighlightRoute);
+                line.on('click', function(e) {
+                    highlightRoute.call(this);
+                    this.openPopup(e.latlng);
                 });
+                line.on('popupclose', function() {
+                    unhighlightRoute.call(this);
+                });
+                
+
             });
         }
         
@@ -256,6 +348,17 @@
             const minVal = parseInt(document.getElementById('minVoyages').value);
             drawRoutes(minVal, this.checked);
         });
+
+        // Toggle panel collapse function
+        function togglePanel(id) {
+            var panel = document.getElementById(id);
+            panel.classList.toggle('collapsed');
+        }
+
+        // Auto-collapse info panel on small screens for better map visibility
+        if (window.innerWidth <= 768) {
+            document.getElementById('infoPanel').classList.add('collapsed');
+        }
     </script>
 </body>
 </html>

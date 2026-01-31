@@ -19,8 +19,12 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             z-index: 1000;
             max-width: 300px;
+            transition: transform 0.3s ease;
         }
-        .info-panel h3 { margin-top: 0; }
+        .info-panel h3 { margin-top: 0; cursor: pointer; }
+        .info-panel h3::after { content: ' ▼'; font-size: 10px; }
+        .info-panel.collapsed h3::after { content: ' ▶'; }
+        .info-panel.collapsed .panel-content { display: none; }
         .legend {
             position: absolute;
             bottom: 30px;
@@ -31,27 +35,71 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             z-index: 1000;
         }
+        .legend-title { cursor: pointer; }
+        .legend-title::after { content: ' ▼'; font-size: 10px; }
+        .legend.collapsed .legend-title::after { content: ' ▶'; }
+        .legend.collapsed .legend-content { display: none; }
         .legend-item { display: flex; align-items: center; margin: 5px 0; }
         .legend-circle { border-radius: 50%; margin-right: 8px; border: 1px solid #333; }
+
+        /* Mobile styles */
+        @media (max-width: 600px) {
+            .info-panel {
+                top: auto;
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                max-height: 40vh;
+                overflow-y: auto;
+                font-size: 14px;
+            }
+            .info-panel h3 { font-size: 16px; }
+            .legend {
+                bottom: auto;
+                top: 10px;
+                left: 50px;
+                font-size: 12px;
+                padding: 8px;
+            }
+            .legend-circle {
+                min-width: 8px;
+                min-height: 8px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .info-panel {
+                padding: 10px;
+                max-height: 35vh;
+            }
+            .legend {
+                max-width: 120px;
+            }
+        }
     </style>
 </head>
 <body>
     <div id="map"></div>
-    <div class="info-panel">
-        <h3>CLIWOC Trade Network</h3>
-        <p><strong>287,114</strong> ship logbook records<br>
-        <strong>799</strong> ports mapped<br>
-        <strong>1750-1850</strong> time period</p>
-        <p>Circle size = total voyage mentions<br>
-        Click a port for details</p>
-        <div id="port-info"></div>
+    <div class="info-panel" id="infoPanel">
+        <h3 onclick="togglePanel('infoPanel')">CLIWOC Trade Network</h3>
+        <div class="panel-content">
+            <p><strong>287,114</strong> ship logbook records<br>
+            <strong>799</strong> ports mapped<br>
+            <strong>1750-1850</strong> time period</p>
+            <p>Circle size = total voyage mentions<br>
+            Click/tap a port for details</p>
+            <div id="port-info"></div>
+        </div>
     </div>
-    <div class="legend">
-        <strong>Mentions:</strong>
-        <div class="legend-item"><div class="legend-circle" style="width:8px;height:8px;background:#fee5d9;"></div> &lt; 100</div>
-        <div class="legend-item"><div class="legend-circle" style="width:12px;height:12px;background:#fcae91;"></div> 100-1,000</div>
-        <div class="legend-item"><div class="legend-circle" style="width:18px;height:18px;background:#fb6a4a;"></div> 1,000-10,000</div>
-        <div class="legend-item"><div class="legend-circle" style="width:25px;height:25px;background:#cb181d;"></div> &gt; 10,000</div>
+    <div class="legend" id="legend">
+        <strong class="legend-title" onclick="togglePanel('legend')">Mentions:</strong>
+        <div class="legend-content">
+            <div class="legend-item"><div class="legend-circle" style="width:8px;height:8px;background:#fee5d9;"></div> &lt; 100</div>
+            <div class="legend-item"><div class="legend-circle" style="width:12px;height:12px;background:#fcae91;"></div> 100-1,000</div>
+            <div class="legend-item"><div class="legend-circle" style="width:18px;height:18px;background:#fb6a4a;"></div> 1,000-10,000</div>
+            <div class="legend-item"><div class="legend-circle" style="width:25px;height:25px;background:#cb181d;"></div> &gt; 10,000</div>
+        </div>
     </div>
     
     <script>
@@ -123,6 +171,17 @@
                 })
             }).addTo(map);
         });
+
+        // Toggle panel collapse function
+        function togglePanel(id) {
+            var panel = document.getElementById(id);
+            panel.classList.toggle('collapsed');
+        }
+
+        // Auto-collapse panels on small screens
+        if (window.innerWidth <= 600) {
+            document.getElementById('infoPanel').classList.add('collapsed');
+        }
     </script>
 </body>
 </html>
