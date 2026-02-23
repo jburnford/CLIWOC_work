@@ -3,6 +3,19 @@ CLIWOC21.tsv
 CLIWOC21.ods
 CLIWOC21.gpkg
 
+# Large output files (>100MB GitHub limit)
+cleaned/cliwoc_cleaned.db
+cleaned/cliwoc_cleaned.db-journal
+
+# External datasets and repos (not ours)
+DagomarDatasets/
+chuk-mcp-maritime-archives/
+
+# Downloaded archives
+*.zip
+*.zip:Zone.Identifier
+*:Zone.Identifier
+
 # Intermediate files
 ports_anchored.csv
 all_ports_summary.csv
